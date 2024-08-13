@@ -1,5 +1,5 @@
 run/api:
-	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
+	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
 
 db/psql:
 	@psql ${ECOMMERCE_DB_DSN}
