@@ -78,9 +78,9 @@ func (l *Logger) Write(message []byte) (n int, err error) {
 func (l *Logger) PrintInfo(message string, properties map[string]string) {
 	_, _ = l.print(LevelInfo, fmt.Sprint(message), properties)
 }
-func (l *Logger) PrintError(message string, properties map[string]string) {
-	_, _ = l.print(LevelError, fmt.Sprint(message), properties)
+func (l *Logger) PrintError(err error, properties map[string]string) {
+	_, _ = l.print(LevelError, err.Error(), properties)
 }
-func (l *Logger) PrintFatal(message string, properties map[string]string) {
-	_, _ = l.print(LevelFatal, fmt.Sprint(message), properties)
+func (l *Logger) PrintFatal(err error, properties map[string]string) {
+	_, _ = l.print(LevelFatal, err.Error(), properties)
 }
