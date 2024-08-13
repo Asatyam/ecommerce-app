@@ -14,7 +14,7 @@ db/psql:
 ## db/migrations/up: Run up migration files
 db/migrations/up:
 	@echo 'Running up migrations...'
-	migrate -path ./migrations -database ${ECOMMERCE_DB_DSN}
+	migrate -path ./migrations -database ${ECOMMERCE_DB_DSN} up
 
 ## db/migrations/new: Create a new migration file with the given name
 db/migrations/new:
