@@ -1,8 +1,8 @@
 run/api:
-	go run ./cmd/api
+	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
 
 db/psql:
-	psql ${ECOMMERCE_DB_DSN}
+	@psql ${ECOMMERCE_DB_DSN}
 
 db/migrations/up:
 	@echo 'Running up migrations...'
