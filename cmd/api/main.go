@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+type envelope map[string]any
 type config struct {
 	port int
 	env  string
