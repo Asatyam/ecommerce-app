@@ -2,8 +2,15 @@ package data
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/Asatyam/ecommerce-app/internal/validator"
+	"github.com/asaskevich/govalidator"
 	"golang.org/x/crypto/bcrypt"
 	"time"
+)
+
+var (
+	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
 type User struct {
@@ -25,6 +32,23 @@ type password struct {
 
 type UserModel struct {
 	DB *sql.DB
+}
+
+func ValidateUser(v *validator.Validator, user *User) {
+
+	v.Check(user.Email != "", "email", "must be provided")
+	v.Check(govalidator.IsEmail(user.Email), "email", "email is not valid")
+
+	v.Check(user.Name != "", "name", "must be provided")
+	v.Check(len(user.Name) <= 500, "name", "must be less than or equal to 500")
+
+	v.Check(*user.Password.plaintext != "", "password", "must be provided")
+	v.Check(len(*user.Password.plaintext) >= 8, "password", "must be of at least 8 characters")
+	v.Check(len(*user.Password.plaintext) <= 72, "password", "must be of at most 72 characters")
+
+	if nil == user.Password.hash {
+		panic("User Password.hash is required")
+	}
 }
 
 func (p *password) Set(plaintext string) error {
@@ -52,7 +76,12 @@ func (m UserModel) Insert(user *User) error {
 
 	err = m.DB.QueryRow(query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
 	if err != nil {
-		return err
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
+		}
 	}
 	return nil
 }

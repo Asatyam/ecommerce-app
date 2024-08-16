@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"github.com/Asatyam/ecommerce-app/internal/data"
+	"github.com/Asatyam/ecommerce-app/internal/validator"
 	"net/http"
 )
 
@@ -28,12 +30,23 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	
-	err = app.models.Users.Insert(user)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
+	v := validator.New()
+	if data.ValidateUser(v, user); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
+	err = app.models.Users.Insert(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			v.AddError("email", "Email already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
 	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
