@@ -28,7 +28,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-
+	
 	err = app.models.Users.Insert(user)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -38,5 +38,5 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	
+
 }
