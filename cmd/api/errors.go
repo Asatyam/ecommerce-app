@@ -20,6 +20,11 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logError(r, err)
+	message := "An unexpected error has occurred"
+	app.errorResponse(w, r, http.StatusInternalServerError, message)
+}
 func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
 	message := "The request resource could not be found"
 	app.errorResponse(w, r, http.StatusNotFound, message)

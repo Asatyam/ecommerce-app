@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/Asatyam/ecommerce-app/internal/data"
 	"github.com/Asatyam/ecommerce-app/internal/jsonlog"
 	_ "github.com/lib/pq"
 	"net/http"
@@ -23,6 +24,7 @@ type config struct {
 type application struct {
 	config config
 	logger *jsonlog.Logger
+	models data.Models
 }
 
 func main() {
@@ -48,6 +50,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", app.config.port),
