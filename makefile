@@ -5,7 +5,7 @@ help:
 
 ## run/api: run the application
 run/api:
-	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
+	@go run ./cmd/api -db-dsn=${ECOMMERCE_DB_DSN}
 
 ## db/psql: connect to the database
 db/psql:
