@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+// writeJSON writes the data into the response
+//
+// Parameters
+//   - w: http.ResponseWriter
+//   - status: http status code
+//   - data : data enveloped using envelope struct
+//   - headers: http headers to send
+//
+// Returns error if any problem occurs while writing data to json
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 
 	js, err := json.MarshalIndent(data, "", "\n")
@@ -28,6 +37,14 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	return nil
 }
 
+// readJSON stores the received json into the dst struct
+//
+// Parameters
+//   - w: http.ResponseWriter
+//   - r: http.Request
+//   - dst: destination struct where each attribute has corresponding json tag
+//
+// Returns error if any problem occurs while reading data from response object
 func (app *application) readJSON(w http.ResponseWriter, r http.Request, dst any) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))

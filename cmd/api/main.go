@@ -63,6 +63,20 @@ func (app *application) demo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// openDB establishes a connection to a PostgreSQL database using the provided configuration.
+//
+// Parameters:
+//   - cfg: A `config` struct that contains the configuration needed to connect to the database.
+//     The `cfg.db.dsn` field should contain the Data Source Name (DSN) for the PostgreSQL database.
+//
+// Returns:
+// - (*sql.DB): A pointer to the `sql.DB` object representing the connection to the database, or nil if an error occurs.
+// - error: An error if the connection could not be established or if the `PingContext` check fails, or nil if successful.
+//
+// This function opens a connection to a PostgreSQL database, verifies the connection by pinging the database,
+// and returns the `sql.DB` object if successful. If there is an error during connection or pinging,
+// it returns the error to allow the caller to handle it appropriately.
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
