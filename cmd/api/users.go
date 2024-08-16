@@ -5,6 +5,7 @@ import (
 	"github.com/Asatyam/ecommerce-app/internal/data"
 	"github.com/Asatyam/ecommerce-app/internal/validator"
 	"net/http"
+	"time"
 )
 
 func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,10 +47,14 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		}
 		return
 	}
+	token, err := app.models.Tokens.New(user.ID, data.ScopeActivation, 15*time.Minute)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user, "token": token}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-
 }
