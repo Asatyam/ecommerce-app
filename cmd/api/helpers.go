@@ -45,7 +45,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 //   - dst: destination struct where each attribute has corresponding json tag
 //
 // Returns error if any problem occurs while reading data from response object
-func (app *application) readJSON(w http.ResponseWriter, r http.Request, dst any) error {
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	dec := json.NewDecoder(r.Body)
