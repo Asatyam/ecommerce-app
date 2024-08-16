@@ -53,6 +53,17 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	app.background(func() {
+		var mailData = map[string]any{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+		}
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", mailData)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
+
 	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user, "token": token}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"github.com/Asatyam/ecommerce-app/internal/data"
 	"github.com/Asatyam/ecommerce-app/internal/jsonlog"
+	"github.com/Asatyam/ecommerce-app/internal/mailer"
 	_ "github.com/lib/pq"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -20,11 +22,20 @@ type config struct {
 	db   struct {
 		dsn string
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -34,6 +45,12 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment(development | production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "Database connection URL")
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP server hostname")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP Port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "26aac60d0744ad", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "705980f9080f4f", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Satyam Agrawal <agrasatyam1282@gmail.com>", "SMTP sender")
 
 	flag.Parse()
 	db, err := openDB(cfg)
@@ -51,6 +68,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", app.config.port),
