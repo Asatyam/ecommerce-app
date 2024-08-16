@@ -10,5 +10,6 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/", app.demo)
 	router.HandlerFunc(http.MethodPost, "/user", app.createUserHandler)
+	router.HandlerFunc(http.MethodPut, "/user/activate", app.activateUserHandler)
 	return router
 }

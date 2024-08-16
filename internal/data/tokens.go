@@ -25,6 +25,11 @@ type Token struct {
 	Expiry    time.Time `json:"expiry"`
 }
 
+func ValidateToken(v *validator.Validator, token string) {
+	v.Check(token != "", "token", "must not be empty")
+	v.Check(len(token) == 26, "token", "must contain 26 characters")
+
+}
 func generateToken(userID int64, scope string, ttl time.Duration) (*Token, error) {
 	token := &Token{
 		UserID: userID,
@@ -67,12 +72,12 @@ func (m *TokenModel) Insert(token *Token) error {
 	_, err := m.DB.Exec(query, args...)
 	return err
 }
-func (m *TokenModel) DeleteForUser(token *Token) error {
+func (m *TokenModel) DeleteForUser(scope string, userID int64) error {
 
 	query := `
 		DELETE FROM tokens
        WHERE user_id = $1 and scope = $2 
 	`
-	_, err := m.DB.Exec(query, token.UserID, token.Scope)
+	_, err := m.DB.Exec(query, userID, scope)
 	return err
 }

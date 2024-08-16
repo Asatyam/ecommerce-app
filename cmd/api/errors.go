@@ -60,3 +60,7 @@ func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Requ
 	message := "your user account does not have necessary permissions to access this resource"
 	app.errorResponse(w, r, http.StatusForbidden, message)
 }
+func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
+	message := "unable to update the record due to an edit conflict, please try again "
+	app.errorResponse(w, r, http.StatusConflict, message)
+}

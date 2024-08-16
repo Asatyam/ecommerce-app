@@ -1,6 +1,7 @@
 package data
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"github.com/Asatyam/ecommerce-app/internal/validator"
@@ -79,6 +80,65 @@ func (m UserModel) Insert(user *User) error {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
+		default:
+			return err
+		}
+	}
+	return nil
+}
+func (m UserModel) GetForToken(scope string, token string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(token))
+	query := `
+	SELECT users.id, users.name, users.created_at,  users.email, users.activated, users.prime, users.is_admin, users.version
+	FROM users
+	INNER JOIN tokens ON users.id = tokens.user_id
+	WHERE tokens.hash = $1
+	and tokens.scope = $2
+	and tokens.expiry > $3
+    `
+	var user User
+	err := m.DB.QueryRow(query, tokenHash[:], scope, time.Now()).Scan(
+		&user.ID,
+		&user.Name,
+		&user.CreatedAt,
+		&user.Email,
+		&user.Activated,
+		&user.Prime,
+		&user.IsAdmin,
+		&user.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &user, nil
+}
+func (m UserModel) Update(user *User) error {
+	query := `
+		UPDATE users 
+		SET name = $1, activated = $2, prime = $3, is_admin = $4, version = version + 1
+		WHERE id=$5 AND version = $6
+		RETURNING version
+`
+	args := []any{
+		user.Name,
+		user.Activated,
+		user.Prime,
+		user.IsAdmin,
+		user.ID,
+		user.Version,
+	}
+	err := m.DB.QueryRow(query, args...).Scan(&user.Version)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
 		default:
 			return err
 		}
