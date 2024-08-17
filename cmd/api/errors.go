@@ -47,6 +47,10 @@ func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter
 	message := "invalid or missing authentication token"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
 }
+func (app *application) invalidPasswordTokenResponse(w http.ResponseWriter, r *http.Request) {
+	message := "invalid or missing password token"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
 
 func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
 	message := "you must be authenticated to access this resource"

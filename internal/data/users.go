@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/Asatyam/ecommerce-app/internal/validator"
 	"github.com/asaskevich/govalidator"
 	"golang.org/x/crypto/bcrypt"
@@ -66,15 +65,12 @@ func (p *password) Set(plaintext string) error {
 	}
 	p.plaintext = &plaintext
 	p.hash = hash
-	fmt.Printf("%v\n", p.hash)
 	return nil
 }
 
 func (p *password) Matches(plaintext string) (bool, error) {
 
 	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintext))
-	hash, _ := bcrypt.GenerateFromPassword([]byte(plaintext), 12)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
@@ -83,7 +79,6 @@ func (p *password) Matches(plaintext string) (bool, error) {
 			return false, err
 		}
 	}
-	fmt.Printf("%v\n %v\n", hash, p.hash)
 	return true, nil
 }
 
@@ -173,8 +168,8 @@ func (m UserModel) GetForToken(scope string, token string) (*User, error) {
 func (m UserModel) Update(user *User) error {
 	query := `
 		UPDATE users 
-		SET name = $1, activated = $2, prime = $3, is_admin = $4, version = version + 1
-		WHERE id=$5 AND version = $6
+		SET name = $1,  activated = $2, prime = $3, is_admin = $4, version = version + 1, password_hash = $5
+		WHERE id=$6 AND version = $7
 		RETURNING version
 `
 	args := []any{
@@ -182,6 +177,7 @@ func (m UserModel) Update(user *User) error {
 		user.Activated,
 		user.Prime,
 		user.IsAdmin,
+		user.Password.hash,
 		user.ID,
 		user.Version,
 	}
