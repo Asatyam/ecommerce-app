@@ -64,7 +64,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		}
 	})
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user, "token": token}, nil)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

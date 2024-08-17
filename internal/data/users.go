@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/Asatyam/ecommerce-app/internal/validator"
 	"github.com/asaskevich/govalidator"
 	"golang.org/x/crypto/bcrypt"
@@ -26,6 +27,8 @@ type User struct {
 	Version   int64     `json:"-"`
 }
 
+var GuestUser = &User{}
+
 type password struct {
 	plaintext *string
 	hash      []byte
@@ -33,6 +36,10 @@ type password struct {
 
 type UserModel struct {
 	DB *sql.DB
+}
+
+func (user *User) IsGuestUser() bool {
+	return user == GuestUser
 }
 
 func ValidateUser(v *validator.Validator, user *User) {
@@ -59,15 +66,29 @@ func (p *password) Set(plaintext string) error {
 	}
 	p.plaintext = &plaintext
 	p.hash = hash
+	fmt.Printf("%v\n", p.hash)
 	return nil
 }
 
-func (m UserModel) Insert(user *User) error {
-	hash, err := bcrypt.GenerateFromPassword([]byte("HelloWorld"), 12)
+func (p *password) Matches(plaintext string) (bool, error) {
+
+	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintext))
+	hash, _ := bcrypt.GenerateFromPassword([]byte(plaintext), 12)
+
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			return false, err
+		}
 	}
-	user.Password.hash = hash
+	fmt.Printf("%v\n %v\n", hash, p.hash)
+	return true, nil
+}
+
+func (m UserModel) Insert(user *User) error {
+
 	query := `
 		INSERT INTO users(name, email, password_hash, activated, prime, is_admin)
 		VALUES ($1, $2, $3, $4, $5, $6)
@@ -75,7 +96,7 @@ func (m UserModel) Insert(user *User) error {
 	`
 	args := []any{user.Name, user.Email, user.Password.hash, user.Activated, user.Prime, user.IsAdmin}
 
-	err = m.DB.QueryRow(query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
+	err := m.DB.QueryRow(query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
@@ -85,6 +106,38 @@ func (m UserModel) Insert(user *User) error {
 		}
 	}
 	return nil
+}
+
+func (m UserModel) GetByEmail(email string) (*User, error) {
+
+	query := `
+		SELECT id, created_at, version, name, email, password_hash, activated, prime, is_admin
+		FROM users
+		WHERE email = $1
+`
+	var user User
+	err := m.DB.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Version,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.Prime,
+		&user.IsAdmin,
+	)
+	if err != nil {
+		switch {
+
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &user, nil
+
 }
 func (m UserModel) GetForToken(scope string, token string) (*User, error) {
 	tokenHash := sha256.Sum256([]byte(token))

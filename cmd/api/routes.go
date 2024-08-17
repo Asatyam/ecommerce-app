@@ -8,8 +8,10 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	router.HandlerFunc(http.MethodGet, "/", app.demo)
+	router.HandlerFunc(http.MethodGet, "/", app.requireActivated(app.demo))
 	router.HandlerFunc(http.MethodPost, "/user", app.createUserHandler)
 	router.HandlerFunc(http.MethodPut, "/user/activate", app.activateUserHandler)
-	return router
+	router.HandlerFunc(http.MethodPost, "/user/authenticate", app.authenticateTokenHandler)
+
+	return app.authenticate(router)
 }
