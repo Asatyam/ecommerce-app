@@ -51,7 +51,7 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "26aac60d0744ad", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "705980f9080f4f", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Satyam Agrawal <agrasatyam1282@gmail.com>", "SMTP sender")
-
+	
 	flag.Parse()
 	db, err := openDB(cfg)
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)

@@ -18,7 +18,12 @@ type BrandModel struct {
 	DB *sql.DB
 }
 
-func ValidateBrand(v validator.Validator, brand *Brand) {
+var (
+	ErrDuplicateBrand      = errors.New("duplicate brand")
+	ErrUnsupportedFileType = errors.New("unsupported file type")
+)
+
+func ValidateBrand(v *validator.Validator, brand *Brand) {
 
 	v.Check(brand.Name != "", "name", "cannot be empty")
 	v.Check(len(brand.Name) <= 50, "name", "must be less than 50 characters")
@@ -27,7 +32,7 @@ func ValidateBrand(v validator.Validator, brand *Brand) {
 
 }
 
-func (m *BrandModel) Insert(brand Brand) error {
+func (m *BrandModel) Insert(brand *Brand) error {
 
 	query := `
 		INSERT INTO brands(name, description, logo)  VALUES 
@@ -38,6 +43,9 @@ func (m *BrandModel) Insert(brand Brand) error {
 
 	err := m.DB.QueryRow(query, args...).Scan(&brand.ID, &brand.Version)
 	if err != nil {
+		if err.Error() == `pq: duplicate key value violates unique constraint "brands_name_key"` {
+			return ErrDuplicateBrand
+		}
 		return err
 	}
 	return nil

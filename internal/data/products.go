@@ -21,7 +21,7 @@ type ProductModel struct {
 	DB *sql.DB
 }
 
-func ValidateProduct(v validator.Validator, product *Product) {
+func ValidateProduct(v *validator.Validator, product *Product) {
 
 	v.Check(product.Name != "", "name", "is required")
 	v.Check(len(product.Name) <= 100, "name", "size of name must not be greater than 100")

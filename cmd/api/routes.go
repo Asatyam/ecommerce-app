@@ -18,6 +18,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPut, "/user/password", app.resetPasswordHandler)
 
 	// Product Routes
-	
+
+	// Brand Routes
+	router.HandlerFunc(http.MethodPost, "/brands", app.createBrandHandler)
+
 	return app.authenticate(router)
 }
