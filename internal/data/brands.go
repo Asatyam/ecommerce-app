@@ -54,7 +54,7 @@ func (m *BrandModel) Insert(brand *Brand) error {
 func (m *BrandModel) Get(id int64) (*Brand, error) {
 
 	query := `
-			SELECT id, name, description, logo
+			SELECT id, name, description, logo, version
 			FROM brands
 			WHERE id=$1
 		`
@@ -63,7 +63,8 @@ func (m *BrandModel) Get(id int64) (*Brand, error) {
 		&brand.ID,
 		&brand.Name,
 		&brand.Description,
-		&brand.Logo)
+		&brand.Logo,
+		&brand.Version)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -83,6 +84,7 @@ func (m *BrandModel) Update(brand *Brand) error {
 			RETURNING version
 `
 	args := []any{brand.Name, brand.Description, brand.Logo, brand.ID, brand.Version}
+
 	err := m.DB.QueryRow(query, args...).Scan(&brand.Version)
 
 	if err != nil {
