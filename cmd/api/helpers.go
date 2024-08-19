@@ -4,8 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Asatyam/ecommerce-app/internal/data"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -107,4 +113,66 @@ func (app *application) background(fn func()) {
 		}()
 		fn()
 	}()
+}
+
+func (app *application) uploadToCloudinary(r *http.Request, file multipart.File, ext string) (string, error) {
+
+	tempFile, err := os.CreateTemp("", "upload-*"+ext)
+	if err != nil {
+		return "", err
+	}
+
+	defer func(tempFile *os.File) {
+		err := tempFile.Close()
+		if err != nil {
+			fmt.Printf("error closing temp file: %s\n", err)
+		}
+	}(tempFile)
+	_, err = io.Copy(tempFile, file)
+	if err != nil {
+		return "", err
+	}
+	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+	cld, err := cloudinary.NewFromURL(cloudinaryURL)
+	if err != nil {
+		return "", err
+	}
+	uploadResult, err := cld.Upload.Upload(r.Context(), tempFile.Name(), uploader.UploadParams{
+		Format: "jpeg",
+	})
+	if err != nil {
+		return "", err
+	}
+	return uploadResult.SecureURL, nil
+}
+
+func (app *application) getImageURL(r *http.Request, key string) (string, error) {
+
+	file, handler, err := r.FormFile(key)
+	if err != nil {
+		return "", errors.New("error Retrieving File from the form")
+	}
+	defer func(file multipart.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+	}(file)
+	ext := strings.ToLower(filepath.Ext(handler.Filename))
+	allowedExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".gif":  true,
+		".bmp":  true,
+	}
+	if !allowedExtensions[ext] {
+		return "", data.ErrUnsupportedFileType
+	}
+	imgURL, err := app.uploadToCloudinary(r, file, ext)
+	if err != nil {
+		return "", errors.New("error Uploading Image")
+	}
+	return imgURL, nil
 }
