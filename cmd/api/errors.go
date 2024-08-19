@@ -72,3 +72,7 @@ func (app *application) unsupportedMediaTypeResponse(w http.ResponseWriter, r *h
 	message := "unsupported media type"
 	app.errorResponse(w, r, http.StatusUnsupportedMediaType, message)
 }
+func (app *application) categoryParentNotFound(w http.ResponseWriter, r *http.Request) {
+	message := "parent category not found"
+	app.errorResponse(w, r, http.StatusBadRequest, message)
+}

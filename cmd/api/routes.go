@@ -25,5 +25,12 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/brands/:id", app.updateBrandHandler)
 	router.HandlerFunc(http.MethodDelete, "/brands/:id", app.deleteBrandHandler)
 
+	// Category Routes
+	router.HandlerFunc(http.MethodGet, "/categories/:id", app.showCategoryHandler)
+	router.HandlerFunc(http.MethodPost, "/categories", app.createCategoryHandler)
+	router.HandlerFunc(http.MethodPatch, "/categories/:id", app.updateCategoryHandler)
+	router.HandlerFunc(http.MethodDelete, "/categories/:id", app.deleteCategoryHandler)
+	router.HandlerFunc(http.MethodGet, "/categories/:id/ancestors", app.getCategoryWithAncestorsHandler)
+
 	return app.authenticate(router)
 }
