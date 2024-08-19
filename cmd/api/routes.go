@@ -23,6 +23,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/brands/:id", app.showBrandHandler)
 	router.HandlerFunc(http.MethodPost, "/brands", app.createBrandHandler)
 	router.HandlerFunc(http.MethodPatch, "/brands/:id", app.updateBrandHandler)
+	router.HandlerFunc(http.MethodDelete, "/brands/:id", app.deleteBrandHandler)
 
 	return app.authenticate(router)
 }
