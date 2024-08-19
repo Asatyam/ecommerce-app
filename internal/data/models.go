@@ -9,6 +9,7 @@ type Models struct {
 	Users    UserModel
 	Tokens   TokenModel
 	Products ProductModel
+	Brands   BrandModel
 }
 
 var (
@@ -21,5 +22,6 @@ func NewModels(db *sql.DB) Models {
 		Users:    UserModel{DB: db},
 		Tokens:   TokenModel{DB: db},
 		Products: ProductModel{DB: db},
+		Brands:   BrandModel{DB: db},
 	}
 }
