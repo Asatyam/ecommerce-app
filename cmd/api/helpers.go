@@ -7,11 +7,13 @@ import (
 	"github.com/Asatyam/ecommerce-app/internal/data"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/julienschmidt/httprouter"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -113,6 +115,15 @@ func (app *application) background(fn func()) {
 		}()
 		fn()
 	}()
+}
+
+func (app *application) readIDParam(r *http.Request) (int64, error) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	if err != nil || id < 1 {
+		return 0, errors.New("id must be an integer")
+	}
+	return id, nil
 }
 
 func (app *application) uploadToCloudinary(r *http.Request, file multipart.File, ext string) (string, error) {

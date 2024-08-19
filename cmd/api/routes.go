@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 	// Product Routes
 
 	// Brand Routes
+	router.HandlerFunc(http.MethodGet, "/brands/:id", app.showBrandHandler)
 	router.HandlerFunc(http.MethodPost, "/brands", app.createBrandHandler)
 
 	return app.authenticate(router)

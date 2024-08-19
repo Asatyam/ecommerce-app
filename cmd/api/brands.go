@@ -54,3 +54,26 @@ func (app *application) createBrandHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 }
+func (app *application) showBrandHandler(w http.ResponseWriter, r *http.Request) {
+
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	brand, err := app.models.Brands.Get(id)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			app.notFoundResponse(w, r)
+			return
+		}
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"brand": brand}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
