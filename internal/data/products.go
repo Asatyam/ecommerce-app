@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	ErrProductAlreadyExists = errors.New("product already exists")
+)
+
 type Product struct {
 	ID          int64     `json:"id"`
 	Name        string    `json:"name"`
@@ -30,7 +34,7 @@ func ValidateProduct(v *validator.Validator, product *Product) {
 	v.Check(product.CategoryID > 0, "category_id", "is required")
 }
 
-func (m ProductModel) Insert(product Product) error {
+func (m ProductModel) Insert(product *Product) error {
 
 	query := `
 		INSERT INTO products (name, description, category_id, brand_id, version) VALUES 
@@ -43,6 +47,11 @@ func (m ProductModel) Insert(product Product) error {
 		&product.CreatedAt,
 		&product.Version)
 
+	if err != nil {
+		if err.Error() == `pq: duplicate key value violates unique constraint "products_name_key"` {
+			return ErrProductAlreadyExists
+		}
+	}
 	return err
 }
 func (m ProductModel) Get(id int64) (*Product, error) {
@@ -70,7 +79,7 @@ func (m ProductModel) Get(id int64) (*Product, error) {
 	}
 	return &product, nil
 }
-func (m ProductModel) Update(product Product) error {
+func (m ProductModel) Update(product *Product) error {
 
 	query := `
 		UPDATE products
@@ -85,6 +94,9 @@ func (m ProductModel) Update(product Product) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrEditConflict
+		}
+		if err.Error() == `pq: duplicate key value violates unique constraint "products_name_key"` {
+			return ErrProductAlreadyExists
 		}
 		return err
 	}

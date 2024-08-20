@@ -130,6 +130,11 @@ func (app *application) updateBrandHandler(w http.ResponseWriter, r *http.Reques
 			app.editConflictResponse(w, r)
 			return
 		}
+		if errors.Is(err, data.ErrDuplicateBrand) {
+			v.AddError("name", "company already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+			return
+		}
 		app.serverErrorResponse(w, r, err)
 		return
 	}

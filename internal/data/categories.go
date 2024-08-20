@@ -79,6 +79,9 @@ func (m CategoryModel) Update(category *Category) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrEditConflict
 		}
+		if err.Error() == `pq: duplicate key value violates unique constraint "categories_name_key"` {
+			return ErrDuplicateCategory
+		}
 		return err
 	}
 	return nil

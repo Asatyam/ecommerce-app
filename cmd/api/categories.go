@@ -53,6 +53,11 @@ func (app *application) createCategoryHandler(w http.ResponseWriter, r *http.Req
 
 	err = app.models.Categories.Insert(category)
 	if err != nil {
+		if errors.Is(err, data.ErrDuplicateCategory) {
+			v.AddError("name", "category name already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+			return
+		}
 		app.serverErrorResponse(w, r, err)
 		return
 	}
@@ -124,6 +129,11 @@ func (app *application) updateCategoryHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		if errors.Is(err, data.ErrEditConflict) {
 			app.editConflictResponse(w, r)
+			return
+		}
+		if errors.Is(err, data.ErrDuplicateCategory) {
+			v.AddError("name", "category name already exists")
+			app.failedValidationResponse(w, r, v.Errors)
 			return
 		}
 		app.serverErrorResponse(w, r, err)

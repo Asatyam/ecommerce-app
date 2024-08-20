@@ -91,6 +91,9 @@ func (m *BrandModel) Update(brand *Brand) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrEditConflict
 		}
+		if err.Error() == `pq: duplicate key value violates unique constraint "brands_name_key"` {
+			return ErrDuplicateBrand
+		}
 		return err
 	}
 	return nil
