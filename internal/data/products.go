@@ -37,11 +37,11 @@ func ValidateProduct(v *validator.Validator, product *Product) {
 func (m ProductModel) Insert(product *Product) error {
 
 	query := `
-		INSERT INTO products (name, description, category_id, brand_id, version) VALUES 
-		($1, $2, $3, $4, $5)
+		INSERT INTO products (name, description, category_id, brand_id) VALUES 
+		($1, $2, $3, $4)
 		RETURNING id, created_at, version`
 
-	args := []any{product.Name, product.Description, product.CategoryID, product.BrandID, product.Version}
+	args := []any{product.Name, product.Description, product.CategoryID, product.BrandID}
 	err := m.DB.QueryRow(query, args...).Scan(
 		&product.ID,
 		&product.CreatedAt,
@@ -57,7 +57,7 @@ func (m ProductModel) Insert(product *Product) error {
 func (m ProductModel) Get(id int64) (*Product, error) {
 
 	query := `
-		SELECT id, name, description, category_id, brand_id, created_at 
+		SELECT id, name, description, category_id, brand_id, created_at, version
 		FROM products
 		WHERE id = $1
 		`
@@ -69,6 +69,7 @@ func (m ProductModel) Get(id int64) (*Product, error) {
 		&product.CategoryID,
 		&product.BrandID,
 		&product.CreatedAt,
+		&product.Version,
 	)
 
 	if err != nil {

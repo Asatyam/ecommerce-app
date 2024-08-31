@@ -18,7 +18,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPut, "/user/password", app.resetPasswordHandler)
 
 	// Product Routes
-
+	router.HandlerFunc(http.MethodPost, "/products", app.createProductHandler)
+	router.HandlerFunc(http.MethodGet, "/products/:id", app.showProductHandler)
+	router.HandlerFunc(http.MethodPatch, "/products/:id", app.updateProductHandler)
+	router.HandlerFunc(http.MethodDelete, "/products/:id", app.deleteProductHandler)
 	// Brand Routes
 	router.HandlerFunc(http.MethodGet, "/brands/:id", app.showBrandHandler)
 	router.HandlerFunc(http.MethodPost, "/brands", app.createBrandHandler)
