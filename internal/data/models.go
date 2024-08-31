@@ -6,11 +6,12 @@ import (
 )
 
 type Models struct {
-	Users      UserModel
-	Tokens     TokenModel
-	Products   ProductModel
-	Brands     BrandModel
-	Categories CategoryModel
+	Users           UserModel
+	Tokens          TokenModel
+	Products        ProductModel
+	Brands          BrandModel
+	Categories      CategoryModel
+	ProductVariants ProductVariantsModel
 }
 
 var (
@@ -20,10 +21,11 @@ var (
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Users:      UserModel{DB: db},
-		Tokens:     TokenModel{DB: db},
-		Products:   ProductModel{DB: db},
-		Brands:     BrandModel{DB: db},
-		Categories: CategoryModel{DB: db},
+		Users:           UserModel{DB: db},
+		Tokens:          TokenModel{DB: db},
+		Products:        ProductModel{DB: db},
+		Brands:          BrandModel{DB: db},
+		Categories:      CategoryModel{DB: db},
+		ProductVariants: ProductVariantsModel{DB: db},
 	}
 }
