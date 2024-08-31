@@ -13,8 +13,8 @@ var (
 type ProductVariant struct {
 	ID        int64          `json:"id"`
 	ProductID int64          `json:"product_id"`
-	Price     float64        `json:"price"`
-	Discount  float64        `json:"discount"`
+	Price     float32        `json:"price"`
+	Discount  float32        `json:"discount"`
 	SKU       string         `json:"sku"`
 	Variants  map[string]any `json:"variants"`
 }
