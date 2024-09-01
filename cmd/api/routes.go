@@ -22,6 +22,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/products/:id", app.showProductHandler)
 	router.HandlerFunc(http.MethodPatch, "/products/:id", app.updateProductHandler)
 	router.HandlerFunc(http.MethodDelete, "/products/:id", app.deleteProductHandler)
+
 	// Brand Routes
 	router.HandlerFunc(http.MethodGet, "/brands/:id", app.showBrandHandler)
 	router.HandlerFunc(http.MethodPost, "/brands", app.createBrandHandler)
@@ -34,6 +35,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/categories/:id", app.updateCategoryHandler)
 	router.HandlerFunc(http.MethodDelete, "/categories/:id", app.deleteCategoryHandler)
 	router.HandlerFunc(http.MethodGet, "/categories/:id/ancestors", app.getCategoryWithAncestorsHandler)
+
+	// Product Variants
+	router.HandlerFunc(http.MethodPost, "/variants/", app.createProductVariantHandler)
 
 	return app.authenticate(router)
 }
