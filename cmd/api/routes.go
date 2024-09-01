@@ -44,6 +44,8 @@ func (app *application) routes() http.Handler {
 
 	//Order Routes
 	router.HandlerFunc(http.MethodPost, "/orders", app.requireActivated(app.createOrderHandler))
-	
+	router.HandlerFunc(http.MethodGet, "/orders/:id", app.requireActivated(app.showOrderHandler))
+	router.HandlerFunc(http.MethodPatch, "/orders/:id", app.requireActivated(app.updateOrderHandler))
+	router.HandlerFunc(http.MethodGet, "/orders", app.requireActivated(app.getAllOrdersHandler))
 	return app.authenticate(router)
 }
