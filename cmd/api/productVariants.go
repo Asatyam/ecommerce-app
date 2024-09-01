@@ -101,3 +101,46 @@ func (app *application) createProductVariantHandler(w http.ResponseWriter, r *ht
 	}
 
 }
+func (app *application) showProductVariantHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	variant, err := app.models.ProductVariants.Get(id)
+	if err != nil {
+		if errors.Is(err, data.ErrVariantDoesNotExist) {
+			app.notFoundResponse(w, r)
+			return
+		}
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"variant": variant}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+}
+func (app *application) deleteProductVariantHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	err = app.models.ProductVariants.Delete(id)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			app.notFoundResponse(w, r)
+			return
+		}
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "variant deleted"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}

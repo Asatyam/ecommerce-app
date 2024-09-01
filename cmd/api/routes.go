@@ -38,6 +38,8 @@ func (app *application) routes() http.Handler {
 
 	// Product Variants
 	router.HandlerFunc(http.MethodPost, "/variants/", app.createProductVariantHandler)
+	router.HandlerFunc(http.MethodGet, "/variants/:id", app.showProductVariantHandler)
+	router.HandlerFunc(http.MethodDelete, "/variants/:id", app.deleteProductVariantHandler)
 
 	return app.authenticate(router)
 }

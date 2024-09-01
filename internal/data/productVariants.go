@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrProductDoesNotExist = errors.New("product does not  exist")
+	ErrVariantDoesNotExist = errors.New("Variant does not  exist")
 )
 
 type ProductVariant struct {
@@ -56,6 +57,59 @@ func (m *ProductVariantsModel) Insert(variant *ProductVariant) error {
 			return ErrProductDoesNotExist
 		}
 		return err
+	}
+	return nil
+}
+
+func (m *ProductVariantsModel) Get(id int64) (*ProductVariant, error) {
+
+	query := `
+	SELECT id, product_id, price, discount, sku, quantity, variants, version
+	FROM product_variants
+	WHERE id = $1;
+	               	                                                                                                   
+`
+	var variant ProductVariant
+	var jsonData []byte
+	err := m.DB.QueryRow(query, id).Scan(
+		&variant.ID,
+		&variant.ProductID,
+		&variant.Price,
+		&variant.Discount,
+		&variant.SKU,
+		&variant.Quantity,
+		&jsonData,
+		&variant.Version)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrVariantDoesNotExist
+		}
+		return nil, err
+	}
+	err = json.Unmarshal(jsonData, &variant.Variants)
+	if err != nil {
+		return nil, err
+	}
+	return &variant, nil
+}
+
+func (m *ProductVariantsModel) Delete(id int64) error {
+
+	query := `
+	DELETE FROM product_variants
+	WHERE id = $1;
+`
+	result, err := m.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
 	}
 	return nil
 }
