@@ -113,3 +113,51 @@ func (m *ProductVariantsModel) Delete(id int64) error {
 	}
 	return nil
 }
+
+func (m *ProductVariantsModel) GetAllVariants(productID int64) ([]*ProductVariant, error) {
+
+	query := `
+		SELECT id, product_id,  price, discount, sku, quantity, variants, version
+		FROM product_variants
+		WHERE product_id = $1;
+`
+	rows, err := m.DB.Query(query, productID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
+	var productVariants []*ProductVariant
+	for rows.Next() {
+		var variant ProductVariant
+		var jsonData []byte
+		err := rows.Scan(
+			&variant.ID,
+			&variant.ProductID,
+			&variant.Price,
+			&variant.Discount,
+			&variant.SKU,
+			&variant.Quantity,
+			&jsonData,
+			&variant.Version)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(jsonData, &variant.Variants)
+		if err != nil {
+			return nil, err
+		}
+		productVariants = append(productVariants, &variant)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return productVariants, nil
+}

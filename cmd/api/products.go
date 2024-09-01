@@ -223,3 +223,25 @@ func (app *application) deleteProductHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 }
+
+func (app *application) getAllProductVariants(w http.ResponseWriter, r *http.Request) {
+
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	variants, err := app.models.ProductVariants.GetAllVariants(id)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			app.notFoundResponse(w, r)
+		}
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"variants": variants}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}

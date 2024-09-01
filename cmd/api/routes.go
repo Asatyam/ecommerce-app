@@ -22,6 +22,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/products/:id", app.showProductHandler)
 	router.HandlerFunc(http.MethodPatch, "/products/:id", app.updateProductHandler)
 	router.HandlerFunc(http.MethodDelete, "/products/:id", app.deleteProductHandler)
+	router.HandlerFunc(http.MethodGet, "/products/:id/variants", app.getAllProductVariants)
 
 	// Brand Routes
 	router.HandlerFunc(http.MethodGet, "/brands/:id", app.showBrandHandler)
