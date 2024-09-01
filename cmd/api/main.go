@@ -33,6 +33,7 @@ type config struct {
 type application struct {
 	config config
 	logger *jsonlog.Logger
+	DB     *sql.DB
 	models data.Models
 	mailer mailer.Mailer
 	wg     sync.WaitGroup
@@ -51,7 +52,7 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "26aac60d0744ad", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "705980f9080f4f", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Satyam Agrawal <agrasatyam1282@gmail.com>", "SMTP sender")
-	
+
 	flag.Parse()
 	db, err := openDB(cfg)
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -67,6 +68,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		DB:     db,
 		models: data.NewModels(db),
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}

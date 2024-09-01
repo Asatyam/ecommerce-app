@@ -12,6 +12,8 @@ type Models struct {
 	Brands          BrandModel
 	Categories      CategoryModel
 	ProductVariants ProductVariantsModel
+	Orders          OrderModel
+	OrderItems      OrderItemsModel
 }
 
 var (
@@ -27,5 +29,7 @@ func NewModels(db *sql.DB) Models {
 		Brands:          BrandModel{DB: db},
 		Categories:      CategoryModel{DB: db},
 		ProductVariants: ProductVariantsModel{DB: db},
+		Orders:          OrderModel{DB: db},
+		OrderItems:      OrderItemsModel{DB: db},
 	}
 }
